@@ -1,6 +1,6 @@
 import * as d3 from "d3";
-import csvPath from '../assets/data/SF_Historical_Ballot_Measures.csv';
-
+//import csvPath from '../assets/data/SF_Historical_Ballot_Measures.csv';
+import csvPath from '../assets/data/data.csv';
 
 function drawBarFromCsv(){
     //async method
@@ -14,21 +14,39 @@ function drawBarFromCsv(){
         //(data will only exist inside here since it is an async call to read in data) so all rendering and processsing with data has to occur inside the "then"
     });
 }
-/* 
+/*
     Same as the one above but we made the function itself asynch so we can use await
     The two do the same thing essentially but it is cleaner to read
 */
 export async function drawBarFromCsvAsync(){
     const data = await d3.csv(csvPath);
-    console.log(data); 
+    console.log(data);
+    console.log(data[0].acousticness);
+    console.log(data[0].key);
+    for(var key in data[0]) {
+     console.log(key)
+
+    }
+
     //process data()
+
+
     //draw chart ()
     //There will be some delay in console before it prints the array
+    //if csv file, this is the main place to work.
 }
 
 
 export function drawBarChart(data, id) {
 
+  //const margin = { top: 40, right: 5, bottom: 120, left: 40 };
+  //const parentDiv = document.getElementById(id.substring(1));
+  //const height = 400;
+  //const width = parentDiv.clientWidth;
+
+
+
+    //stick something above.
     const margin = { top: 40, right: 40, bottom: 120, left: 100 };
     const height = 300;
     const width = 500;
@@ -83,6 +101,3 @@ export function drawBarChart(data, id) {
                 .attr("y", -80)
                 .attr("font-weight", "bold"))
 }
-
-
-
