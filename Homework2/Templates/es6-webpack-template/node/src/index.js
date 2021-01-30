@@ -7,9 +7,10 @@ import {drawBarChart, drawBarFromCsvAsync} from "./js/barchart"; /* Example of i
 
 let x = 2;
 console.log(testData);
-drawBarChart(testData["data"], "#bar");
-drawBarChart(testData["data"], "#bar2");
-drawBarChart(testData["data"], "#bar3");
+//drawBarChart(testData["data"], "#bar");
+//drawBarChart(testData["data"], "#bar2");
+//drawBarChart(testData["data"], "#bar3");
+//drawBarChart(testData["data"], "#bar4");
 drawBarFromCsvAsync();
 
 
