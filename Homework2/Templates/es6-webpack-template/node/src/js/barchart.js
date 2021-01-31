@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 //import csvPath from '../assets/data/SF_Historical_Ballot_Measures.csv';
-//import csvPath from '../assets/data/data.csv';
+import csvPath from '../assets/data/data.csv';
 import csvPath_yearTempo from '../assets/data/data_by_year.csv';
 import csvPath_genreTempo from '../assets/data/data_by_genres.csv';
 
@@ -23,8 +23,10 @@ function drawBarFromCsv(){
     The main place to edit:
 */
 export async function drawBarFromCsvAsync(){
+    const data_all = await d3.csv(csvPath);
     const data_yearTempo = await d3.csv(csvPath_yearTempo);
     const data_genreTempo = await d3.csv(csvPath_genreTempo);
+    console.log(data_all);
     console.log(data_yearTempo);
     console.log(data_genreTempo);
     /*console.log(data[0].acousticness);
@@ -38,6 +40,7 @@ export async function drawBarFromCsvAsync(){
 
     //draw chart ()
     //drawBarChartCSV(processedData, 'example1');
+    drawPCP(data_yearTempo, "#PCP")
     drawBarChartCSV(data_yearTempo, "#yearTempo");
     drawBarChartCSV_genreTempo(data_genreTempo, "#genreTempo");
 
@@ -81,6 +84,135 @@ function processData(data){
 
 }
 
+function drawPCP(data,id){
+
+  //reference: https://www.d3-graph-gallery.com/graph/parallel_custom.html
+
+  // set the dimensions and margins of the graph
+  var margin = {top: 30, right: 10, bottom: 10, left: 0},
+  width = 700 - margin.left - margin.right,
+  height = 400 - margin.top - margin.bottom;
+
+  // append the svg object to the body of the page
+  var svg = d3.select(id)
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+  // Color scale. I return a color
+  var yearName = [];
+  var seedYear = 1920;
+  var tmpYear = 0;
+  var stringTmpYear = tmpYear.toString();
+  for (var i=0; i <= 101; i++){
+    tmpYear = seedYear + i;
+    stringTmpYear = tmpYear.toString();
+    yearName.push(stringTmpYear);
+  }
+
+  var colorScale = []
+  for (var i=0; i <= 101; i++){
+    tmpYear = seedYear + i;
+    if (tmpYear <= 1953){
+      colorScale.push("#440154ff");
+    }else if (tmpYear <= 1986){
+      colorScale.push("#21908dff");
+    }else{
+      colorScale.push("#fde725ff");
+    }
+  }
+  //console.log(colorScale);
+
+  var color = d3.scaleOrdinal()
+  .domain(yearName)
+  .range(colorScale)
+
+  // the list of dimensions we want to keep in the plot.
+  var dimensions = ["year","acousticness","danceability","liveness","tempo"]
+
+  // For each dimension, I build a linear scale. I store all in a y object
+  var y = {}
+  for (var i in dimensions) {
+    name = dimensions[i]
+    y[name] = d3.scaleLinear()
+      .domain( d3.extent(data, function(d) { return +d[name]; }) )
+      .range([height, 0])
+  }
+
+  // Build the X scale -> it find the best position for each Y axis
+  var x = d3.scalePoint()
+   .range([0, width])
+   //.padding(1)
+   .domain(dimensions);
+
+ // Highlight the specie that is hovered
+ var highlight = function(d){
+
+   var selected_year = d.year;
+
+   // first every group turns grey
+   d3.selectAll(".line")
+     .transition().duration(200)
+     .style("stroke", "lightgrey")
+     .style("opacity", "0.2")
+   // Second the hovered specie takes its color
+   d3.selectAll("." + selected_year)
+     .transition().duration(200)
+     .style("stroke", color(selected_year))
+     .style("opacity", "1")
+ }
+
+ // Unhighlight
+ var doNotHighlight = function(d){
+   d3.selectAll(".line")
+     .transition().duration(200).delay(1000)
+     .style("stroke", function(d){ return( color(d.year))} )
+     .style("opacity", "1")
+ }
+
+  // The path function take a row of the csv as input, and return x and y coordinates of the line to draw for this raw.
+  function path(d) {
+      return d3.line()(dimensions.map(function(p) { return [x(p), y[p](d[p])]; }));
+  }
+
+  // Draw the lines
+ svg
+   .selectAll("myPath")
+   .data(data)
+   .enter()
+   .append("path")
+   .attr("class", function (d) { return "line " + d.year } )
+   .attr("d",  path)
+   .style("fill", "none")
+   .style("stroke", function(d){ return( color(d.year))} )
+   .style("opacity", 0.5)
+   .on("mouseover", highlight)
+   .on("mouseleave", doNotHighlight )
+
+   // Draw the axis:
+   svg.selectAll("myAxis")
+     // For each dimension of the dataset I add a 'g' element:
+     .data(dimensions).enter()
+     .append("g")
+     .attr("class", "axis")
+     // I translate this element to its right position on the x axis
+     .attr("transform", function(d) { return "translate(" + x(d) + ")"; })
+     // And I build the axis with the call function
+     //.each(function(d) { d3.select(this).call(d3.axisLeft().scale(y[d])); })
+     .each(function(d) { d3.select(this).call(d3.axisLeft().ticks(5).scale(y[d])); })
+    // Add axis title
+     // Add axis title
+     .append("text")
+       .style("text-anchor", "middle")
+       .attr("y", -9)
+       .text(function(d) { return d; })
+       .style("fill", "black")
+
+
+}
 
 function drawBarChartCSV_genreTempo(data, id) {
 
@@ -157,7 +289,7 @@ function drawBarChartCSV(data, id) {
     //stick something above.
     const margin = { top: 40, right: 40, bottom: 120, left: 100 };
     const height = 300;
-    const width = 500;
+    const width = 1200;
 
     const x = d3.scaleBand().domain(data.map(d => d.year))
         .rangeRound([margin.left, width - margin.right])
