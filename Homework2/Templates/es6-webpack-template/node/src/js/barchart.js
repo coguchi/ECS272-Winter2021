@@ -1,6 +1,8 @@
 import * as d3 from "d3";
 //import csvPath from '../assets/data/SF_Historical_Ballot_Measures.csv';
-import csvPath from '../assets/data/data.csv';
+//import csvPath from '../assets/data/data.csv';
+import csvPath_yearTempo from '../assets/data/data_by_year.csv';
+import csvPath_genreTempo from '../assets/data/data_by_genres.csv';
 
 function drawBarFromCsv(){
     //async method
@@ -21,8 +23,10 @@ function drawBarFromCsv(){
     The main place to edit:
 */
 export async function drawBarFromCsvAsync(){
-    const data = await d3.csv(csvPath);
-    console.log(data);
+    const data_yearTempo = await d3.csv(csvPath_yearTempo);
+    const data_genreTempo = await d3.csv(csvPath_genreTempo);
+    console.log(data_yearTempo);
+    console.log(data_genreTempo);
     /*console.log(data[0].acousticness);
     console.log(data[0].key);
     for(var key in data[0]) {
@@ -30,10 +34,12 @@ export async function drawBarFromCsvAsync(){
     }*/
 
     //process data()
-    const processedData = processData(data);
+    //const processedData = processData(data);
 
     //draw chart ()
-    drawBarChartCSV(processedData, 'example1');
+    //drawBarChartCSV(processedData, 'example1');
+    drawBarChartCSV(data_yearTempo, "#yearTempo");
+    drawBarChartCSV_genreTempo(data_genreTempo, "#genreTempo");
 
     //There will be some delay in console before it prints the array
     //if csv file, this is the main place to work.
@@ -75,6 +81,72 @@ function processData(data){
 
 }
 
+
+function drawBarChartCSV_genreTempo(data, id) {
+
+  //const margin = { top: 40, right: 5, bottom: 120, left: 40 };
+  //const parentDiv = document.getElementById(id.substring(1));
+  //const height = 400;
+  //const width = parentDiv.clientWidth;
+
+    //stick something above.
+    const margin = { top: 40, right: 40, bottom: 120, left: 100 };
+    const height = 300;
+    const width = 500;
+
+    const x = d3.scaleBand().domain(data.map(d => d.genres))
+        .rangeRound([margin.left, width - margin.right])
+        .padding(0.0001);
+
+    const y = d3.scaleLinear().domain([0, d3.max(data, d => d.tempo)]).nice()
+        .rangeRound([height - margin.bottom, margin.top]);
+
+    let svg = d3.select(id).append("svg")
+        .attr("viewBox", [0, 0, width, height])
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
+
+    svg.selectAll("rect")
+        .data(data)
+        .join("rect")
+        .attr("x", d => x(d.genres))
+        .attr("y", d => y(d.tempo))
+        .attr("width", x.bandwidth())
+        .attr("height", d => y(0) - y(d.tempo))
+        .attr("fill", "green");
+
+    const xAxis = g => g
+        .attr("transform", `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(x))
+
+    const yAxis = g => g
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(d3.axisLeft(y))
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis)
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-65)")
+        .attr("font-weight", "bold");
+
+    svg.append("g")
+        .call(yAxis)
+        .call(g => g.select(".tick:last-of-type text")
+                .clone()
+                .attr("transform", `rotate(-90)`)
+                .attr("text-anchor", "middle")
+                .attr("x", -(15 - margin.top - margin.bottom) / 2)
+                .attr("y", -80)
+                .attr("font-weight", "bold"))
+}
+
+
+
 function drawBarChartCSV(data, id) {
 
   //const margin = { top: 40, right: 5, bottom: 120, left: 40 };
@@ -87,11 +159,11 @@ function drawBarChartCSV(data, id) {
     const height = 300;
     const width = 500;
 
-    const x = d3.scaleBand().domain(data.map(d => d.y))
+    const x = d3.scaleBand().domain(data.map(d => d.year))
         .rangeRound([margin.left, width - margin.right])
         .padding(0.1);
 
-    const y = d3.scaleLinear().domain([0, d3.max(data, d => d.x)]).nice()
+    const y = d3.scaleLinear().domain([0, d3.max(data, d => d.tempo)]).nice()
         .rangeRound([height - margin.bottom, margin.top]);
 
     let svg = d3.select(id).append("svg")
@@ -102,10 +174,10 @@ function drawBarChartCSV(data, id) {
     svg.selectAll("rect")
         .data(data)
         .join("rect")
-        .attr("x", d => x(d.y))
-        .attr("y", d => y(d.x))
+        .attr("x", d => x(d.year))
+        .attr("y", d => y(d.tempo))
         .attr("width", x.bandwidth())
-        .attr("height", d => y(0) - y(d.x))
+        .attr("height", d => y(0) - y(d.tempo))
         .attr("fill", "green");
 
     const xAxis = g => g
