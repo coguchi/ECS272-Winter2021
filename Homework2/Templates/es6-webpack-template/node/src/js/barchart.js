@@ -1,8 +1,8 @@
 import * as d3 from "d3";
 //import csvPath from '../assets/data/SF_Historical_Ballot_Measures.csv';
 import csvPath from '../assets/data/data.csv';
-import csvPath_yearTempo from '../assets/data/data_by_year.csv';
-import csvPath_genreTempo from '../assets/data/data_by_genres.csv';
+import csvPath_year from '../assets/data/data_by_year.csv';
+import csvPath_genre from '../assets/data/data_by_genres.csv';
 
 function drawBarFromCsv(){
     //async method
@@ -24,11 +24,11 @@ function drawBarFromCsv(){
 */
 export async function drawBarFromCsvAsync(){
     const data_all = await d3.csv(csvPath);
-    const data_yearTempo = await d3.csv(csvPath_yearTempo);
-    const data_genreTempo = await d3.csv(csvPath_genreTempo);
+    const data_year = await d3.csv(csvPath_year);
+    const data_genre = await d3.csv(csvPath_genre);
     console.log(data_all);
-    console.log(data_yearTempo);
-    console.log(data_genreTempo);
+    console.log(data_year);
+    console.log(data_genre);
     /*console.log(data[0].acousticness);
     console.log(data[0].key);
     for(var key in data[0]) {
@@ -40,9 +40,11 @@ export async function drawBarFromCsvAsync(){
 
     //draw chart ()
     //drawBarChartCSV(processedData, 'example1');
-    drawPCP(data_yearTempo, "#PCP")
-    drawBarChartCSV(data_yearTempo, "#yearTempo");
-    drawBarChartCSV_genreTempo(data_genreTempo, "#genreTempo");
+    drawPCP(data_year, "#PCP");
+    drawLineDropdown(data_year, "#LineDropdown");
+
+    //drawBarChartCSV(data_yearTempo, "#yearTempo");
+    //drawBarChartCSV_genreTempo(data_genreTempo, "#genreTempo");
 
     //There will be some delay in console before it prints the array
     //if csv file, this is the main place to work.
@@ -84,6 +86,103 @@ function processData(data){
 
 }
 
+function drawLineDropdown(data, id){
+
+  //reference: https://www.d3-graph-gallery.com/graph/line_select.html
+
+  // set the dimensions and margins of the graph
+var margin = {top: 10, right: 100, bottom: 30, left: 30},
+    width = 460 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select(id)
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+// List of groups (here I have one group per column)
+var allGroup = ["acousticness","danceability","liveness","tempo"]
+
+// add the options to the button
+d3.select("#selectButton")
+  .selectAll('myOptions')
+ 	.data(allGroup)
+  .enter()
+	.append('option')
+  .text(function (d) { return d; }) // text showed in the menu
+  .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+
+// A color scale: one color for each group
+var myColor = d3.scaleOrdinal()
+  .domain(allGroup)
+  .range(d3.schemeSet2);
+
+
+// Add X axis --> it is a date format
+var x = d3.scaleLinear()
+  .domain([1920,2021])
+  .range([ 0, 400]);
+svg.append("g")
+  .attr("transform", "translate(0," + height + ")")
+  .call(d3.axisBottom(x));
+
+// Add Y axis
+var y = d3.scaleLinear()
+  .domain( [0,1])
+  .range([ height, 0 ]);
+svg.append("g")
+  .call(d3.axisLeft(y));
+
+// Initialize line with group a
+var line = svg
+  .append('g')
+  .append("path")
+    .datum(data)
+    .attr("d", d3.line()
+      .x(function(d) { return x(+d.year) })
+      .y(function(d) { return y(+d.acousticness) })
+    )
+    .attr("stroke", function(d){ return myColor("acousticness") })
+    .style("stroke-width", 4)
+    .style("fill", "none")
+
+// A function that update the chart
+function update(selectedGroup) {
+
+  // Create new data with the selection?
+  var dataFilter = data.map(function(d){return {year: d.year, value:d[selectedGroup]} })
+
+  // Give these new data to update line
+  line
+      .datum(dataFilter)
+      .transition()
+      .duration(1000)
+      .attr("d", d3.line()
+        .x(function(d) { return x(+d.year) })
+        .y(function(d) { return y(+d.value) })
+      )
+      .attr("stroke", function(d){ return myColor(selectedGroup) })
+}
+
+// When the button is changed, run the updateChart function
+d3.select("#selectButton").on("change", function(d) {
+    // recover the option that has been chosen
+    var selectedOption = d3.select(this).property("value")
+    // run the updateChart function with this selected option
+    update(selectedOption)
+})
+
+
+
+
+}
+
+
 function drawPCP(data,id){
 
   //reference: https://www.d3-graph-gallery.com/graph/parallel_custom.html
@@ -124,7 +223,6 @@ function drawPCP(data,id){
       colorScale.push("#fde725ff");
     }
   }
-  //console.log(colorScale);
 
   var color = d3.scaleOrdinal()
   .domain(yearName)
