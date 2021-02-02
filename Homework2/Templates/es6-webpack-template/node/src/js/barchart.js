@@ -43,6 +43,7 @@ export async function drawBarFromCsvAsync(){
     drawPCP(data_year, "#PCP");
     drawLineDropdown(data_year, "#LineDropdown");
 
+
     //drawBarChartCSV(data_yearTempo, "#yearTempo");
     //drawBarChartCSV_genreTempo(data_genreTempo, "#genreTempo");
 
@@ -205,18 +206,30 @@ function drawPCP(data,id){
   //reference: https://www.d3-graph-gallery.com/graph/parallel_custom.html
 
   // set the dimensions and margins of the graph
-  var margin = {top: 30, right: 10, bottom: 10, left: 0},
-  width = 400 - margin.left - margin.right,  //700
-  height = 250 - margin.top - margin.bottom; //400
+  //var margin = {top: 30, right: 10, bottom: 10, left: 0},
+  //width = 400 - margin.left - margin.right,  //700
+  //height = 250 - margin.top - margin.bottom; //400
+
+
+  const margin = { top: 40, right: 5, bottom: 100, left: 40 };
+  /* 0  height & width where am i drawing this thing */
+  const parentDiv = document.getElementById(id.substring(1));  //this is the div that you will draw / append the svg to
+  const height = 400; // whatever height you want
+  const width = parentDiv.clientWidth;
+  /* 1st where we are drawing*/
+  var svg = d3.select(id).append("svg")
+      .attr("viewBox", [0, 0, width, height])
+      .attr("width", "100%")
+      .attr("height", height);
 
   // append the svg object to the body of the page
-  var svg = d3.select(id)
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
+//  var svg = d3.select(id)
+//  .append("svg")
+//    .attr("width", width + margin.left + margin.right)
+//    .attr("height", height + margin.top + margin.bottom)
+//  .append("g")
+//    .attr("transform",
+//          "translate(" + margin.left + "," + margin.top + ")");
 
   // Color scale. I return a color
   var yearName = [];
@@ -258,10 +271,12 @@ function drawPCP(data,id){
   }
 
   // Build the X scale -> it find the best position for each Y axis
-  var x = d3.scalePoint()
-   .range([0, width])
+  //var x = d3.scalePoint()
+  // .range([0, width])
    //.padding(1)
-   .domain(dimensions);
+  // .domain(dimensions);
+
+   var x = d3.scalePoint().domain(dimensions).range([margin.left, width - margin.right - margin.left]);
 
  // Highlight the specie that is hovered
  var highlight = function(d){
