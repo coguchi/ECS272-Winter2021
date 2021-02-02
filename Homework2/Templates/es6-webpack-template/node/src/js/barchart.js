@@ -148,7 +148,8 @@ var line = svg
       .x(function(d) { return x(+d.year) })
       .y(function(d) { return y(+d.acousticness) })
     )
-    .attr("stroke", function(d){ return myColor("acousticness") })
+    //.attr("stroke", function(d){ return myColor("acousticness") })
+    .attr("stroke","pink" )
     .style("stroke-width", 4)
     .style("fill", "none")
 
@@ -180,8 +181,8 @@ function update(selectedGroup,data) {
         .x(function(d) { return x(+d.year) })
         .y(function(d) { return y(+d.value) })
       )
-      .attr("stroke", function(d){ return myColor(selectedGroup) })
-
+      //.attr("stroke", function(d){ return myColor(selectedGroup) })
+      .attr("stroke", "pink")
 
 
 
@@ -218,9 +219,12 @@ function drawPCP(data,id){
   const width = parentDiv.clientWidth;
   /* 1st where we are drawing*/
   var svg = d3.select(id).append("svg")
-      .attr("viewBox", [0, 0, width, height])
+      .attr("viewBox", [0, 0, width, height+65])
       .attr("width", "100%")
-      .attr("height", height);
+      .attr("height", height)
+      .append("g")
+          .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
 
   // append the svg object to the body of the page
 //  var svg = d3.select(id)
@@ -276,7 +280,7 @@ function drawPCP(data,id){
    //.padding(1)
   // .domain(dimensions);
 
-   var x = d3.scalePoint().domain(dimensions).range([margin.left, width - margin.right - margin.left]);
+ var x = d3.scalePoint().domain(dimensions).range([margin.left, width - margin.right - margin.left]);
 
  // Highlight the specie that is hovered
  var highlight = function(d){
