@@ -135,7 +135,7 @@ svg.append("g")
 var y = d3.scaleLinear()
   .domain( [0,1])
   .range([ height, 0 ]);
-svg.append("g")
+var yAxis = svg.append("g")
   .call(d3.axisLeft(y));
 
 // Initialize line with group a
@@ -152,10 +152,23 @@ var line = svg
     .style("fill", "none")
 
 // A function that update the chart
-function update(selectedGroup) {
+function update(selectedGroup,data) {
 
   // Create new data with the selection?
   var dataFilter = data.map(function(d){return {year: d.year, value:d[selectedGroup]} })
+
+  console.log(selectedGroup);
+
+  //change the axis according to the value.
+  if (selectedGroup == "tempo") {
+    y.domain([90,130])
+    yAxis.transition().duration(1000).call(d3.axisLeft(y))
+
+  }else{
+    y.domain([0,1])
+    yAxis.transition().duration(1000).call(d3.axisLeft(y))
+  }
+
 
   // Give these new data to update line
   line
@@ -167,6 +180,10 @@ function update(selectedGroup) {
         .y(function(d) { return y(+d.value) })
       )
       .attr("stroke", function(d){ return myColor(selectedGroup) })
+
+
+
+
 }
 
 // When the button is changed, run the updateChart function
@@ -174,7 +191,7 @@ d3.select("#selectButton").on("change", function(d) {
     // recover the option that has been chosen
     var selectedOption = d3.select(this).property("value")
     // run the updateChart function with this selected option
-    update(selectedOption)
+    update(selectedOption,data)
 })
 
 
@@ -189,8 +206,8 @@ function drawPCP(data,id){
 
   // set the dimensions and margins of the graph
   var margin = {top: 30, right: 10, bottom: 10, left: 0},
-  width = 700 - margin.left - margin.right,
-  height = 400 - margin.top - margin.bottom;
+  width = 400 - margin.left - margin.right,  //700
+  height = 250 - margin.top - margin.bottom; //400
 
   // append the svg object to the body of the page
   var svg = d3.select(id)
@@ -257,8 +274,8 @@ function drawPCP(data,id){
      .style("stroke", "lightgrey")
      .style("opacity", "0.2")
    // Second the hovered specie takes its color
-   d3.selectAll("." + selected_year)
-     .transition().duration(200)
+   d3.selectAll(".line" + selected_year)
+     .transition().duration(500)
      .style("stroke", color(selected_year))
      .style("opacity", "1")
  }
