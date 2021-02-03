@@ -44,11 +44,36 @@ export async function drawBarFromCsvAsync(){
     drawLineDropdown(data_year, "#LineDropdown");
 
 
-    drawBarChartCSV(data_year, "#yearTempo");
+    //drawBarChartCSV(data_year, "#yearTempo");
+    var processedData = processExtractData(data_genre);
+    console.log(processedData);
+    drawBarDropdown(processedData, "#BarDropdown");
     //drawBarChartCSV_genreTempo(data_genre, "#genreTempo");
 
     //There will be some delay in console before it prints the array
     //if csv file, this is the main place to work.
+}
+
+function processExtractData(data){
+
+  var processedData = [];
+  var genreNames = ["anime","blues","j-pop","k-pop","disco","ballroom","worship"];
+  data.forEach(d => {
+    if(genreNames.includes(d.genres)){
+      processedData.push( {
+        genres: d.genres,
+        acousticness: d.acousticness,
+        danceability: d.danceability,
+        liveness: d.liveness,
+        tempo: d.tempo
+      });
+      //console.log(processedData);
+    }
+
+  });
+
+
+  return processedData;
 }
 
 function processData(data){
@@ -87,11 +112,149 @@ function processData(data){
 
 }
 
+function drawBarDropdown(data,id){
+
+  //reference:https://www.d3-graph-gallery.com/graph/barplot_basic.html
+
+  const margin = { top: 10, right: 50, bottom: 60, left: 45 };
+  /* 0  height & width where am i drawing this thing */
+  const parentDiv = document.getElementById(id.substring(1));  //this is the div that you will draw / append the svg to
+  const height = 300; // whatever height you want
+  const width = parentDiv.clientWidth;
+  /* 1st where we are drawing*/
+  var svg = d3.select(id).append("svg")
+      .attr("viewBox", [0, 0, width+250, height+65])
+      .attr("width", "100%")
+      .attr("height", height)
+      .append("g")
+          .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+  var genreNames = ["anime","blues","j-pop","k-pop","disco","ballroom","worship"];
+  var allGroup = ["acousticness","danceability","liveness","tempo"];
+
+  // add the options to the button
+  d3.select("#selectButtonBar")
+    .selectAll('myOptions')
+   	.data(allGroup)
+    .enter()
+  	.append('option')
+    .text(function (d) { return d; }) // text showed in the menu
+    .attr("value", function (d) { return d; }); // corresponding value returned by the button
+
+
+  // X axis
+  var x = d3.scaleBand()
+    .range([ 0, width ])
+    .domain(data.map(function(d) { return d.genres; }))
+    .padding(0.2);
+  var xAxis = svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x))
+    .selectAll("text")
+      .attr("transform", "translate(-10,0)rotate(-45)")
+      .style("text-anchor", "end");
+
+  // text label for the x axis
+  svg.append("text")
+    .attr("transform",
+          "translate(" + (width/2) + " ," +
+                         (height + margin.top + 40) + ")")
+    .style("font-size", "12px")
+    .style("text-anchor", "left")
+    .text("Genre");
+
+  // Add Y axis
+  var y = d3.scaleLinear()
+    .domain([0, 1.0])
+    .range([ height, 0]);
+  var yAxis = svg.append("g")
+    .call(d3.axisLeft(y));
+
+  // text label for the y axis
+  svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - margin.left)
+    .attr("x",0 - (height / 2))
+    .attr("dy", "1em")
+    .style("font-size", "12px")
+    .style("text-anchor", "middle")
+    .text("Value");
+
+  //add title
+  svg.append("text")
+    .attr("x", 0)
+    .attr("y", 0 - (margin.top / 2))
+    .attr("text-anchor", "left")
+    .style("font-size", "15px")
+    .style("text-decoration", "underline")
+    .text("Examples of characteristics in different genres");
+
+ // Bars
+ var bar = svg.selectAll("mybar")
+   .data(data)
+   .enter()
+   .append("rect")
+     .attr("x", function(d) { return x(d.genres); })
+     .attr("y", function(d) { return y(d.acousticness); })
+     .attr("width", x.bandwidth())
+     .attr("height", function(d) { return height - y(d.acousticness); })
+     .attr("fill", "darkblue");
+
+ // A function that update the chart
+ function update(selectedGroup,data) {
+
+   // Create new data with the selection?
+   var dataFilter = data.map(function(d){return {genre: d.genres, value:d[selectedGroup]} })
+
+   console.log(selectedGroup);
+
+   //change the axis according to the value.
+   if (selectedGroup == "tempo") {
+     y.domain([90,130])
+     yAxis.transition().duration(1000).call(d3.axisLeft(y))
+
+   }else{
+     y.domain([0,1])
+     yAxis.transition().duration(1000).call(d3.axisLeft(y))
+   }
+
+   // variable u: map data to existing bars
+    var u = svg.selectAll("rect")
+      .data(data);
+
+    // update bars
+    u
+      .enter()
+      .append("rect")
+      .merge(u)
+      .transition()
+      .duration(1000)
+        .attr("x", function(d) { return x(d.genres); })
+        .attr("y", function(d) { return y(d[selectedGroup]); })
+        .attr("width", x.bandwidth())
+        .attr("height", function(d) { return height - y(d[selectedGroup]); })
+        .attr("fill", "darkblue")
+
+ }
+
+ // When the button is changed, run the updateChart function
+ d3.select("#selectButtonBar").on("change", function(d) {
+     // recover the option that has been chosen
+     var selectedOption = d3.select(this).property("value")
+     // run the updateChart function with this selected option
+     update(selectedOption,data)
+ })
+
+
+
+}
+
 function drawLineDropdown(data, id){
 
   //reference: https://www.d3-graph-gallery.com/graph/line_select.html
 
-  const margin = { top: 20, right: 50, bottom: 60, left: 45 };
+  const margin = { top: 10, right: 50, bottom: 60, left: 45 };
   /* 0  height & width where am i drawing this thing */
   const parentDiv = document.getElementById(id.substring(1));  //this is the div that you will draw / append the svg to
   const height = 300; // whatever height you want
@@ -120,7 +283,7 @@ function drawLineDropdown(data, id){
 //          "translate(" + margin.left + "," + margin.top + ")");
 
 // List of groups (here I have one group per column)
-var allGroup = ["acousticness","danceability","liveness","tempo"]
+var allGroup = ["acousticness","danceability","liveness","tempo"];
 
 // add the options to the button
 d3.select("#selectButton")
@@ -191,7 +354,7 @@ var line = svg
       .y(function(d) { return y(+d.acousticness) })
     )
     //.attr("stroke", function(d){ return myColor("acousticness") })
-    .attr("stroke","pink" )
+    .attr("stroke","violet" )
     .style("stroke-width", 4)
     .style("fill", "none")
 
@@ -224,7 +387,7 @@ function update(selectedGroup,data) {
         .y(function(d) { return y(+d.value) })
       )
       //.attr("stroke", function(d){ return myColor(selectedGroup) })
-      .attr("stroke", "pink")
+      .attr("stroke", "violet")
 
 
 
@@ -257,7 +420,7 @@ function drawPCP(data,id){
   const margin = { top: 40, right: 5, bottom: 100, left: 40 };
   /* 0  height & width where am i drawing this thing */
   const parentDiv = document.getElementById(id.substring(1));  //this is the div that you will draw / append the svg to
-  const height = 400; // whatever height you want
+  const height = 300; // whatever height you want
   const width = parentDiv.clientWidth - 200;
   /* 1st where we are drawing*/
   var svg = d3.select(id).append("svg")
