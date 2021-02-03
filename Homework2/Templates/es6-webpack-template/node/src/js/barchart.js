@@ -44,8 +44,8 @@ export async function drawBarFromCsvAsync(){
     drawLineDropdown(data_year, "#LineDropdown");
 
 
-    //drawBarChartCSV(data_yearTempo, "#yearTempo");
-    //drawBarChartCSV_genreTempo(data_genreTempo, "#genreTempo");
+    drawBarChartCSV(data_year, "#yearTempo");
+    //drawBarChartCSV_genreTempo(data_genre, "#genreTempo");
 
     //There will be some delay in console before it prints the array
     //if csv file, this is the main place to work.
@@ -91,19 +91,33 @@ function drawLineDropdown(data, id){
 
   //reference: https://www.d3-graph-gallery.com/graph/line_select.html
 
+  const margin = { top: 20, right: 50, bottom: 60, left: 45 };
+  /* 0  height & width where am i drawing this thing */
+  const parentDiv = document.getElementById(id.substring(1));  //this is the div that you will draw / append the svg to
+  const height = 300; // whatever height you want
+  const width = parentDiv.clientWidth;
+  /* 1st where we are drawing*/
+  var svg = d3.select(id).append("svg")
+      .attr("viewBox", [0, 0, width+250, height+65])
+      .attr("width", "100%")
+      .attr("height", height)
+      .append("g")
+          .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
   // set the dimensions and margins of the graph
-var margin = {top: 10, right: 100, bottom: 30, left: 30},
-    width = 460 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+//var margin = {top: 30, right: 80, bottom: 50, left: 45},
+//    width = 280 - margin.left - margin.right,
+//    height = 250 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
-var svg = d3.select(id)
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
+//var svg = d3.select(id)
+//  .append("svg")
+//    .attr("width", width + margin.left + margin.right)
+//    .attr("height", height + margin.top + margin.bottom)
+//  .append("g")
+//    .attr("transform",
+//          "translate(" + margin.left + "," + margin.top + ")");
 
 // List of groups (here I have one group per column)
 var allGroup = ["acousticness","danceability","liveness","tempo"]
@@ -132,12 +146,40 @@ svg.append("g")
   .attr("transform", "translate(0," + height + ")")
   .call(d3.axisBottom(x));
 
+// text label for the x axis
+svg.append("text")
+  .attr("transform",
+        "translate(" + (width/2) + " ," +
+                       (height + margin.top + 40) + ")")
+  .style("font-size", "12px")
+  .style("text-anchor", "left")
+  .text("Year");
+
 // Add Y axis
 var y = d3.scaleLinear()
   .domain( [0,1])
   .range([ height, 0 ]);
 var yAxis = svg.append("g")
   .call(d3.axisLeft(y));
+
+// text label for the y axis
+svg.append("text")
+  .attr("transform", "rotate(-90)")
+  .attr("y", 0 - margin.left)
+  .attr("x",0 - (height / 2))
+  .attr("dy", "1em")
+  .style("font-size", "12px")
+  .style("text-anchor", "middle")
+  .text("Value");
+
+//add title
+svg.append("text")
+  .attr("x", 0)
+  .attr("y", 0 - (margin.top / 2))
+  .attr("text-anchor", "left")
+  .style("font-size", "15px")
+  .style("text-decoration", "underline")
+  .text("The characteristics of music over the years");
 
 // Initialize line with group a
 var line = svg
@@ -216,7 +258,7 @@ function drawPCP(data,id){
   /* 0  height & width where am i drawing this thing */
   const parentDiv = document.getElementById(id.substring(1));  //this is the div that you will draw / append the svg to
   const height = 400; // whatever height you want
-  const width = parentDiv.clientWidth;
+  const width = parentDiv.clientWidth - 200;
   /* 1st where we are drawing*/
   var svg = d3.select(id).append("svg")
       .attr("viewBox", [0, 0, width, height+65])
@@ -254,10 +296,10 @@ function drawPCP(data,id){
     }else if (tmpYear <= 1986){
       colorScale.push("#21908dff");
     }else{
-      colorScale.push("#fde725ff");
+      colorScale.push("orange");
     }
   }
-
+  //yellow: #fde725ff
   var color = d3.scaleOrdinal()
   .domain(yearName)
   .range(colorScale)
@@ -274,6 +316,14 @@ function drawPCP(data,id){
       .range([height, 0])
   }
 
+  //put legend
+  svg.append("circle").attr("cx",parentDiv.clientWidth+ 10-200).attr("cy",190).attr("r", 6).style("fill", "#440154ff")
+  svg.append("circle").attr("cx",parentDiv.clientWidth+ 10-200).attr("cy",160).attr("r", 6).style("fill", "#21908dff")
+  svg.append("circle").attr("cx",parentDiv.clientWidth+ 10-200).attr("cy",130).attr("r", 6).style("fill", "orange")
+  svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 190).text("Year 1920-1953").style("font-size", "15px").attr("alignment-baseline","middle")
+  svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 160).text("Year 1954-1986").style("font-size", "15px").attr("alignment-baseline","middle")
+  svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 130).text("Year 1987-2021").style("font-size", "15px").attr("alignment-baseline","middle")
+
   // Build the X scale -> it find the best position for each Y axis
   //var x = d3.scalePoint()
   // .range([0, width])
@@ -283,9 +333,10 @@ function drawPCP(data,id){
  var x = d3.scalePoint().domain(dimensions).range([margin.left, width - margin.right - margin.left]);
 
  // Highlight the specie that is hovered
- var highlight = function(d){
+ var highlight = function(e,d){
 
-   var selected_year = d.year;
+   var selected_year = d.year.toString();
+   console.log(d.year.toString());
 
    // first every group turns grey
    d3.selectAll(".line")
@@ -293,8 +344,8 @@ function drawPCP(data,id){
      .style("stroke", "lightgrey")
      .style("opacity", "0.2")
    // Second the hovered specie takes its color
-   d3.selectAll(".line" + selected_year)
-     .transition().duration(500)
+   d3.selectAll("." + selected_year)
+     .transition().duration(200)
      .style("stroke", color(selected_year))
      .style("opacity", "1")
  }
@@ -318,13 +369,13 @@ function drawPCP(data,id){
    .data(data)
    .enter()
    .append("path")
-   .attr("class", function (d) { return "line " + d.year } )
+   .attr("class", function (d) { return "line " + d.year.toString() } )
    .attr("d",  path)
    .style("fill", "none")
    .style("stroke", function(d){ return( color(d.year))} )
    .style("opacity", 0.5)
-   .on("mouseover", highlight)
-   .on("mouseleave", doNotHighlight )
+   //.on("mouseover", highlight)
+   //.on("mouseleave", doNotHighlight )
 
    // Draw the axis:
    svg.selectAll("myAxis")
@@ -345,6 +396,14 @@ function drawPCP(data,id){
        .text(function(d) { return d; })
        .style("fill", "black")
 
+ //add title
+ svg.append("text")
+   .attr("x", 0)
+   .attr("y", 0 - (margin.top / 2))
+   .attr("text-anchor", "left")
+   .style("font-size", "15px")
+   .style("text-decoration", "underline")
+   .text("Overview of the characteristics of music");
 
 }
 
