@@ -440,6 +440,7 @@ function drawPCP(data,id){
 //    .attr("transform",
 //          "translate(" + margin.left + "," + margin.top + ")");
 
+
   // Color scale. I return a color
   var yearName = [];
   var seedYear = 1920;
@@ -467,13 +468,29 @@ function drawPCP(data,id){
   .domain(yearName)
   .range(colorScale)
 
+  var allGroup = ["Show all", "Focus 1987-2021", "Focus 1954-1986", "Focus 1920-1953"];
+
+  // add the options to the button
+  d3.select("#selectButtonPCP")
+    .selectAll('myOptions')
+   	.data(allGroup)
+    .enter()
+  	.append('option')
+    .text(function (d) { return d; }) // text showed in the menu
+    .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+
+
+
   // the list of dimensions we want to keep in the plot.
   var dimensions = ["year","acousticness","danceability","liveness","tempo"]
+
+
 
   // For each dimension, I build a linear scale. I store all in a y object
   var y = {}
   for (var i in dimensions) {
-    name = dimensions[i]
+    var name = dimensions[i]
     y[name] = d3.scaleLinear()
       .domain( d3.extent(data, function(d) { return +d[name]; }) )
       .range([height, 0])
@@ -498,19 +515,26 @@ function drawPCP(data,id){
  // Highlight the specie that is hovered
  var highlight = function(e,d){
 
-   var selected_year = d.year.toString();
-   console.log(d.year.toString());
+   var selected_year = d.year;
+   console.log(d.year);
 
    // first every group turns grey
    d3.selectAll(".line")
      .transition().duration(200)
-     .style("stroke", "lightgrey")
+     .style("stroke", "black")
      .style("opacity", "0.2")
    // Second the hovered specie takes its color
-   d3.selectAll("." + selected_year)
+  /* d3.selectAll("." + selected_year)
      .transition().duration(200)
      .style("stroke", color(selected_year))
      .style("opacity", "1")
+*/
+     console.log(typeof selected_year);
+     //d3.selectAll(".line")
+     d3.select("1998")
+       .transition().duration(200)
+       .style("stroke", color(selected_year))
+       .style("opacity", "1")
  }
 
  // Unhighlight
@@ -527,18 +551,18 @@ function drawPCP(data,id){
   }
 
   // Draw the lines
- svg
+ var line = svg
    .selectAll("myPath")
    .data(data)
    .enter()
    .append("path")
-   .attr("class", function (d) { return "line " + d.year.toString() } )
+   .attr("class", function (d) { return "line " + d.year } )
    .attr("d",  path)
    .style("fill", "none")
-   .style("stroke", function(d){ return( color(d.year))} )
+   .style("stroke", function(d){return(color(d.year))} )
    .style("opacity", 0.5)
-   //.on("mouseover", highlight)
-   //.on("mouseleave", doNotHighlight )
+   .on("mouseover", highlight)
+   .on("mouseleave", doNotHighlight )
 
    // Draw the axis:
    svg.selectAll("myAxis")
@@ -551,7 +575,7 @@ function drawPCP(data,id){
      // And I build the axis with the call function
      //.each(function(d) { d3.select(this).call(d3.axisLeft().scale(y[d])); })
      .each(function(d) { d3.select(this).call(d3.axisLeft().ticks(5).scale(y[d])); })
-    // Add axis title
+
      // Add axis title
      .append("text")
        .style("text-anchor", "middle")
@@ -568,6 +592,113 @@ function drawPCP(data,id){
    .style("text-decoration", "underline")
    .text("Overview of the characteristics of music");
 
+ function update(selectedGroup,data) {
+
+   function path(d) {
+       return d3.line()(dimensions.map(function(p) { return [x(p), y[p](d[p])]; }));
+   }
+
+   var allGroup = ["Show all", "Focus 1987-2021", "Focus 1954-1986", "Focus 1920-1953"];
+   var yearName = [];
+   var seedYear = 1920;
+   var tmpYear = 0;
+   var stringTmpYear = tmpYear.toString();
+   for (var i=0; i <= 101; i++){
+     tmpYear = seedYear + i;
+     stringTmpYear = tmpYear.toString();
+     yearName.push(stringTmpYear);
+   }
+   var colorScale = []
+
+   if (selectedGroup == allGroup[0]){
+     // Color scale. I return a color
+
+     tmpYear = 0
+     colorScale = []
+     for (var i=0; i <= 101; i++){
+       tmpYear = seedYear + i;
+       if (tmpYear <= 1953){
+         colorScale.push("#440154ff");
+       }else if (tmpYear <= 1986){
+         colorScale.push("#21908dff");
+       }else{
+         colorScale.push("orange");
+       }
+     }
+     //yellow: #fde725ff
+     var color = d3.scaleOrdinal()
+     .domain(yearName)
+     .range(colorScale);
+   }else if (selectedGroup == allGroup[1]){
+
+     colorScale = []
+     tmpYear = 0
+     for (var i=0; i <= 101; i++){
+       tmpYear = seedYear + i;
+       if (tmpYear <= 1953){
+         colorScale.push("gray");
+       }else if (tmpYear <= 1986){
+         colorScale.push("gray");
+       }else{
+         colorScale.push("orange");
+       }
+     }
+     //yellow: #fde725ff
+     var color = d3.scaleOrdinal()
+     .domain(yearName)
+     .range(colorScale);
+
+     console.log(colorScale);
+
+   }
+
+
+
+
+
+   // Give these new data to update line
+
+   line
+   .datum(data)
+   .transition()
+   .attr("d",path)
+   .style("fill", "none")
+   .style("stroke", function(d){  console.log(d.year); return color(d)})
+   .style("opacity", 0.5)
+
+   console.log("uuuuuuuum");
+
+
+   /*   line
+       .datum(data)
+       .transition()
+       .attr("d",  path)
+       .attr("stroke", function(d){ return( "darkblue")} )
+
+   line
+       .datum(dataFilter)
+       .transition()
+       .duration(1000)
+       .attr("d", d3.line()
+         .x(function(d) { return x(+d.year) })
+         .y(function(d) { return y(+d.value) })
+       )
+       //.attr("stroke", function(d){ return myColor(selectedGroup) })
+       .attr("stroke", "violet")
+*/
+
+
+     }
+
+ /*
+  // When the button is changed, run the updateChart function
+  d3.select("#selectButtonPCP").on("change", function(d) {
+     // recover the option that has been chosen
+     var selectedOption = d3.select(this).property("value")
+     // run the updateChart function with this selected option
+     update(selectedOption,data)
+  })
+ */
 }
 
 function drawBarChartCSV_genreTempo(data, id) {
