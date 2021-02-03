@@ -503,6 +503,8 @@ function drawPCP(data,id){
   svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 190).text("Year 1920-1953").style("font-size", "15px").attr("alignment-baseline","middle")
   svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 160).text("Year 1954-1986").style("font-size", "15px").attr("alignment-baseline","middle")
   svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 130).text("Year 1987-2021").style("font-size", "15px").attr("alignment-baseline","middle")
+  svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 30).text("Hover on to see").style("font-size", "15px").attr("alignment-baseline","middle")
+  svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 45).text("individual data").style("font-size", "15px").attr("alignment-baseline","middle")
 
   // Build the X scale -> it find the best position for each Y axis
   //var x = d3.scalePoint()
@@ -516,12 +518,12 @@ function drawPCP(data,id){
  var highlight = function(e,d){
 
    var selected_year = d.year;
-   console.log(d.year);
+   //console.log(d.year);
 
    // first every group turns grey
    d3.selectAll(".line")
      .transition().duration(200)
-     .style("stroke", "black")
+     .style("stroke", "lightgray")
      .style("opacity", "0.2")
    // Second the hovered specie takes its color
   /* d3.selectAll("." + selected_year)
@@ -529,9 +531,9 @@ function drawPCP(data,id){
      .style("stroke", color(selected_year))
      .style("opacity", "1")
 */
-     console.log(typeof selected_year);
-     //d3.selectAll(".line")
-     d3.select("1998")
+     //console.log(typeof selected_year);
+     //d3.selectAll(".line"+"1998")
+     d3.select(".y" + selected_year)
        .transition().duration(200)
        .style("stroke", color(selected_year))
        .style("opacity", "1")
@@ -556,7 +558,7 @@ function drawPCP(data,id){
    .data(data)
    .enter()
    .append("path")
-   .attr("class", function (d) { return "line " + d.year } )
+   .attr("class", function (d) { return "line y" + d.year } )
    .attr("d",  path)
    .style("fill", "none")
    .style("stroke", function(d){return(color(d.year))} )
