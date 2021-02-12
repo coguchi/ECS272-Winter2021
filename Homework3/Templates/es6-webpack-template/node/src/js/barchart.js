@@ -54,6 +54,28 @@ export async function drawBarFromCsvAsync(){
     //if csv file, this is the main place to work.
 }
 
+function initChartSpace(id,data){
+  const parentDiv = document.getElementById(id.substring(1));
+  const height = 400;
+  const width = parentDiv.clientWidth;
+
+  const svgID = id.substring(1) + "-svg";
+
+  const svg = d3.select(id).append("svg")
+    .attr("vieewBox",[0,0,width,height])
+    .attr("id",svgID)
+    .attr("width","100%")
+    .attr("height",height);
+
+    svg.append("g")
+      .attr("class","x axis")
+      .attr("transform", "translate(0," + height + ")");
+
+    svg.append("g")
+      .attr("class", "y axis");
+
+}
+
 function processExtractData(data){
 
   var processedData = [];
