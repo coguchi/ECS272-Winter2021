@@ -45,10 +45,11 @@ export async function drawBarFromCsvAsync(){
 
 
     //drawBarChartCSV(data_year, "#yearTempo");
-    var processedData = processExtractData(data_genre);
-    console.log(processedData);
-    drawBarDropdown(processedData, "#BarDropdown");
-    //drawBarChartCSV_genreTempo(data_genre, "#genreTempo");
+    //var processedData = processExtractData(data_genre);
+    //console.log(processedData);
+    //drawBarDropdown(processedData, "#BarDropdown");
+
+    drawScatterZoom(data_year, "#ScatterZoom");
 
     //There will be some delay in console before it prints the array
     //if csv file, this is the main place to work.
@@ -75,6 +76,134 @@ function initChartSpace(id,data){
       .attr("class", "y axis");
 
 }
+
+
+function drawScatterZoom(data,id){
+
+  //reference: https://www.d3-graph-gallery.com/graph/interactivity_zoom.html#axisZoom
+
+  // set the dimensions and margins of the graph
+  var margin = {top: 40, right: 50, bottom: 90, left: 45},
+      width = 400 - margin.left - margin.right,
+      height = 300 - margin.top - margin.bottom;
+
+  // append the SVG object to the body of the page
+  var SVG = d3.select(id)
+    .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    // Add X axis
+    var x = d3.scaleLinear()
+      .domain([90, 130])
+      .range([ 0, width ]);
+    var xAxis = SVG.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+    // text label for the x axis
+    SVG.append("text")
+      .attr("transform",
+            "translate(" + (width/2) + " ," +
+                           (height + margin.top + 40) + ")")
+      .style("font-size", "12px")
+      .style("text-anchor", "left")
+      .text("Tempo");
+
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain([0, 1])
+      .range([ height, 0]);
+    var yAxis = SVG.append("g")
+      .call(d3.axisLeft(y));
+
+    // text label for the y axis
+    SVG.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin.left)
+      .attr("x",0 - (height / 2))
+      .attr("dy", "1em")
+      .style("font-size", "12px")
+      .style("text-anchor", "middle")
+      .text("Value");
+
+    //add title
+    SVG.append("text")
+      .attr("x", 0)
+      .attr("y", 0 - (margin.top / 2))
+      .attr("text-anchor", "left")
+      .style("font-size", "15px")
+      .style("text-decoration", "underline")
+      .text("Correlation between tempo and acousticness");
+
+    // Add a clipPath: everything out of this area won't be drawn.
+    var clip = SVG.append("defs").append("SVG:clipPath")
+        .attr("id", "clip")
+        .append("SVG:rect")
+        .attr("width", width )
+        .attr("height", height )
+        .attr("x", 0)
+        .attr("y", 0);
+
+    // Create the scatter variable: where both the circles and the brush take place
+    var scatter = SVG.append('g')
+      .attr("clip-path", "url(#clip)")
+
+    // Add circles
+    scatter
+      .selectAll("circle")
+      .data(data)
+      .enter()
+      .append("circle")
+        .attr("cx", function (d) { return x(d.tempo); } )
+        .attr("cy", function (d) { return y(d.acousticness); } )
+        .attr("r", 5)
+        //.style("fill", "#61a3a9")
+        .style("fill", "gray")
+        .style("opacity", 0.5)
+
+    // Set the zoom and Pan features: how much you can zoom, on which part, and what to do when there is a zoom
+    var zoom = d3.zoom()
+        .scaleExtent([.5, 10])  // This control how much you can unzoom (x0.5) and zoom (x20)
+        .extent([[0, 0], [width, height]])
+        .on("zoom", updateChartScatter);
+
+    // This add an invisible rect on top of the chart area. This rect can recover pointer events: necessary to understand when the user zoom
+    SVG.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .style("fill", "none")
+        .style("pointer-events", "all")
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+        .call(zoom);
+    // now the user can zoom and it will trigger the function called updateChart
+
+    // A function that updates the chart when the user zoom and thus new boundaries are available
+    function updateChartScatter({transform}) {
+
+
+      // recover the new scale
+      var newX = transform.rescaleX(x).interpolate(d3.interpolateRound);
+      var newY = transform.rescaleY(y).interpolate(d3.interpolateRound);
+
+      // update axes with these new boundaries
+      xAxis.call(d3.axisBottom(newX))
+      yAxis.call(d3.axisLeft(newY))
+
+      // update circle position
+      scatter
+        .selectAll("circle")
+        .attr("transform", transform)
+        .attr('cx', function(d) {return newX(d.tempo)})
+        .attr('cy', function(d) {return newY(d.acousticness)});
+    }
+
+}
+
 
 function processExtractData(data){
 
