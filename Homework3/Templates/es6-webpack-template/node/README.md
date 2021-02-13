@@ -4,3 +4,6 @@
 *Step 2: enter the command in terminal `npm i`
 *Step 3: enter the command `npm start`
 
+Please install d3-annotation.
+to install: npm i d3-svg-annotation -S
+website: https://d3-annotation.susielu.com/#examples

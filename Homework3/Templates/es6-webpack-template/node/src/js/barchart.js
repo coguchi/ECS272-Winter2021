@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import * as d3Annotation from "d3-svg-annotation"
 //import csvPath from '../assets/data/SF_Historical_Ballot_Measures.csv';
 import csvPath from '../assets/data/data.csv';
 import csvPath_year from '../assets/data/data_by_year.csv';
@@ -22,6 +23,9 @@ function drawBarFromCsv(){
 
     The main place to edit:
 */
+
+
+
 export async function drawBarFromCsvAsync(){
     const data_all = await d3.csv(csvPath);
     const data_year = await d3.csv(csvPath_year);
@@ -40,18 +44,24 @@ export async function drawBarFromCsvAsync(){
 
     //draw chart ()
     //drawBarChartCSV(processedData, 'example1');
-    drawPCP(data_year, "#PCP");
+
+
+
+    drawScatterZoom(data_year, "#ScatterZoom");
 
     //initChartSpace(data_year,"#LineDropdown")
-    drawLineDropdown(data_year, "#LineDropdown");
+    var year = 0;
+    drawLineDropdown(data_year, "#LineDropdown", year);
 
+
+    drawPCP(data_year, "#PCP");
 
     //drawBarChartCSV(data_year, "#yearTempo");
     //var processedData = processExtractData(data_genre);
     //console.log(processedData);
     //drawBarDropdown(processedData, "#BarDropdown");
 
-    drawScatterZoom(data_year, "#ScatterZoom");
+
 
     //There will be some delay in console before it prints the array
     //if csv file, this is the main place to work.
@@ -403,26 +413,30 @@ function drawBarDropdown(data,id){
 
 }
 
-function drawLineDropdown(data, id){
+function drawLineDropdown(data, id, selected_year){
 
   //reference: https://www.d3-graph-gallery.com/graph/line_select.html
 
-  const margin = { top: 10, right: 50, bottom: 60, left: 45 };
+  console.log("hi");
+  console.log(selected_year);
+
+
+
+
+  var margin = { top: 10, right: 50, bottom: 60, left: 45 };
   /* 0  height & width where am i drawing this thing */
-  const parentDiv = document.getElementById(id.substring(1));  //this is the div that you will draw / append the svg to
-  const height = 300; // whatever height you want
-  const width = parentDiv.clientWidth;
+  var parentDiv = document.getElementById(id.substring(1));  //this is the div that you will draw / append the svg to
+  var height = 300 - margin.top - margin.bottom; // whatever height you want
+  var width = parentDiv.clientWidth - margin.left - margin.right;
   /* 1st where we are drawing*/
-  var svg = d3.select(id).append("svg")
-      .attr("viewBox", [0, 0, width+250, height+65])
-      .attr("width", "100%")
-      .attr("height", height)
+  var svg_line = d3.select(id).append("svg")
+      // .attr("viewBox", [0, 0, width+250, height+65])
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .attr("class", function (d) { return "line_svg"} )
       .append("g")
           .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
-
-
-
 
   // List of groups (here I have one group per column)
   var allGroup = ["acousticness","danceability","liveness","tempo"];
@@ -446,13 +460,17 @@ function drawLineDropdown(data, id){
   // Add X axis --> it is a date format
   var x = d3.scaleLinear()
     .domain([1920,2021])
-    .range([ 0, 400]);
-  svg.append("g")
+    .range([ 0, width - margin.right]);
+  svg_line.append("g")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(x));
 
+    var x2 = d3.scaleLinear()
+      .domain([1920,2021])
+      .range([ margin.left, width]);
+
   // text label for the x axis
-  svg.append("text")
+  svg_line.append("text")
     .attr("transform",
           "translate(" + (width/2) + " ," +
                          (height + margin.top + 40) + ")")
@@ -464,11 +482,16 @@ function drawLineDropdown(data, id){
   var y = d3.scaleLinear()
     .domain( [0,1])
     .range([ height, 0 ]);
-  var yAxis = svg.append("g")
+  var yAxis = svg_line.append("g")
     .call(d3.axisLeft(y));
 
+
+        var y2 = d3.scaleLinear()
+          .domain( [0,1])
+          .range([ height, margin.top ]);
+
   // text label for the y axis
-  svg.append("text")
+  svg_line.append("text")
     .attr("transform", "rotate(-90)")
     .attr("y", 0 - margin.left)
     .attr("x",0 - (height / 2))
@@ -478,16 +501,16 @@ function drawLineDropdown(data, id){
     .text("Value");
 
   //add title
-  svg.append("text")
+  svg_line.append("text")
     .attr("x", 0)
-    .attr("y", 0 - (margin.top / 2))
+    .attr("y", 4)
     .attr("text-anchor", "left")
     .style("font-size", "15px")
     .style("text-decoration", "underline")
     .text("The characteristics of music over the years");
 
   // Initialize line with group a
-  var line = svg
+  var line = svg_line
     .append('g')
     .append("path")
       .datum(data)
@@ -499,6 +522,67 @@ function drawLineDropdown(data, id){
       .attr("stroke","violet" )
       .style("stroke-width", 4)
       .style("fill", "none")
+
+
+  //make annotation
+  if(selected_year != 0){
+    const type = d3Annotation.annotationLabel;
+    const annotations = [{
+      note: {
+        label: selected_year + "\n" + data[0 + selected_year - 1920].acousticness,
+        bgPadding: 20,
+        title: "Annotations :)"
+      },
+      //can use x, y directly instead of data
+      data: data[0 + selected_year - 1920],
+      className: "show-bg",
+      dy: 0,
+      dx: 0
+    }]
+
+    const makeAnnotations = d3Annotation.annotation()
+      .editMode(true)
+      //also can set and override in the note.padding property
+      //of the annotation object
+      .notePadding(15)
+      .type(type)
+      //accessors & accessorsInverse not needed
+      //if using x, y in annotations JSON
+      .accessors({
+        x: d => x2(d.year),
+        y: d => y2(d.acousticness)
+      })
+      .annotations(annotations)
+
+    d3.select(".line_svg")
+      .append("g")
+      .attr("class", "annotation-group")
+      .call(makeAnnotations)
+
+
+  }
+
+  //draw a dot  didn't work. :(
+  /*
+  if(selected_year != 0){
+
+    console.log(data[0 + selected_year - 1920]);
+    var selectedData = data[0 + selected_year - 1920];
+    console.log(selectedData.acousticness);
+
+    svg_line.append('g')
+      .selectAll("path")
+      .data(data)
+      .enter()
+      .append("circle")
+        .attr("cx", data[0 + selected_year - 1920].year )
+        .attr("cy", data[0 + selected_year - 1920].acousticness )
+        .attr("r", 10)
+        .style("fill", "blue")
+
+  }
+  */
+
 
   // A function that update the chart
   function update(selectedGroup,data) {
@@ -679,6 +763,12 @@ function drawPCP(data,id){
        .transition().duration(200)
        .style("stroke", color(selected_year))
        .style("opacity", "1")
+
+   //update line graph also
+   d3.selectAll("#LineDropdown > *").remove();
+   drawLineDropdown(data,"#LineDropdown",selected_year);
+
+
  }
 
  // Unhighlight
@@ -811,25 +901,6 @@ function drawPCP(data,id){
    .style("opacity", 0.5)
 
    console.log("uuuuuuuum");
-
-
-   /*   line
-       .datum(data)
-       .transition()
-       .attr("d",  path)
-       .attr("stroke", function(d){ return( "darkblue")} )
-
-   line
-       .datum(dataFilter)
-       .transition()
-       .duration(1000)
-       .attr("d", d3.line()
-         .x(function(d) { return x(+d.year) })
-         .y(function(d) { return y(+d.value) })
-       )
-       //.attr("stroke", function(d){ return myColor(selectedGroup) })
-       .attr("stroke", "violet")
-*/
 
 
      }
