@@ -89,7 +89,7 @@ function initChartSpace(id,data){
 
 }
 
-
+var selectedOption = "acousticness";
 function drawScatterZoom(data,id){
 
   //reference: https://www.d3-graph-gallery.com/graph/interactivity_zoom.html#axisZoom
@@ -107,6 +107,18 @@ function drawScatterZoom(data,id){
     .append("g")
       .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
+
+
+  var allGroup = ["acousticness","danceability","liveness"];
+
+  // add the options to the button
+  d3.select("#selectButtonScatter")
+    .selectAll('myOptions')
+   	.data(allGroup)
+    .enter()
+  	.append('option')
+    .text(function (d) { return d; }) // text showed in the menu
+    .attr("value", function (d) { return d; }); // corresponding value returned by the button
 
     // Add X axis
     var x = d3.scaleLinear()
@@ -150,7 +162,7 @@ function drawScatterZoom(data,id){
       .attr("text-anchor", "left")
       .style("font-size", "15px")
       .style("text-decoration", "underline")
-      .text("Correlation between tempo and acousticness");
+      .text("Correlation between tempo and other characteristics");
 
     // Add a clipPath: everything out of this area won't be drawn.
     var clip = SVG.append("defs").append("SVG:clipPath")
@@ -178,6 +190,76 @@ function drawScatterZoom(data,id){
         .style("fill", "gray")
         .style("opacity", 0.5)
 
+//
+// A function that update the chart
+function update(selectedGroup,data) {
+
+  // variable u: map data to existing bars
+   var u = SVG.selectAll("circle")
+     .data(data);
+
+  if(selectedGroup == "liveness"){
+    // update bars
+    u
+      .enter()
+      .append("circle")
+      .merge(u)
+      .transition()
+      .duration(1000)
+        .attr("cx", function(d) { return x(d.tempo); })
+        .attr("cy", function(d) { return y(d.liveness); })
+        .attr("r",5)
+        .attr("fill", "gray")
+        .style("opacity",0.5)
+
+  }else if(selectedGroup == "danceability"){
+
+    // update bars
+    u
+      .enter()
+      .append("circle")
+      .merge(u)
+      .transition()
+      .duration(1000)
+        .attr("cx", function(d) { return x(d.tempo); })
+        .attr("cy", function(d) { return y(d.danceability); })
+        .attr("r",5)
+        .attr("fill", "gray")
+        .style("opacity",0.5)
+  }else{
+    // update bars
+    u
+      .enter()
+      .append("circle")
+      .merge(u)
+      .transition()
+      .duration(1000)
+        .attr("cx", function(d) { return x(d.tempo); })
+        .attr("cy", function(d) { return y(d.acousticness); })
+        .attr("r",5)
+        .attr("fill", "gray")
+        .style("opacity",0.5)
+  }
+
+
+}
+
+// When the button is changed, run the updateChart function
+
+console.log(selectedOption);
+d3.select("#selectButtonScatter").on("change", function(d) {
+    // recover the option that has been chosen
+    selectedOption = d3.select(this).property("value")
+    // run the updateChart function with this selected option
+    update(selectedOption,data)
+    console.log(selectedOption);
+})
+
+
+
+//
+
+
     // Set the zoom and Pan features: how much you can zoom, on which part, and what to do when there is a zoom
     var zoom = d3.zoom()
         .scaleExtent([.5, 10])  // This control how much you can unzoom (x0.5) and zoom (x20)
@@ -197,7 +279,6 @@ function drawScatterZoom(data,id){
     // A function that updates the chart when the user zoom and thus new boundaries are available
     function updateChartScatter({transform}) {
 
-
       // recover the new scale
       var newX = transform.rescaleX(x).interpolate(d3.interpolateRound);
       var newY = transform.rescaleY(y).interpolate(d3.interpolateRound);
@@ -206,13 +287,35 @@ function drawScatterZoom(data,id){
       xAxis.call(d3.axisBottom(newX))
       yAxis.call(d3.axisLeft(newY))
 
+
+      if (selectedOption == "acousticness"){
       // update circle position
-      scatter
-        .selectAll("circle")
-        .attr("transform", transform)
-        .attr('cx', function(d) {return newX(d.tempo)})
-        .attr('cy', function(d) {return newY(d.acousticness)});
+        scatter
+          .selectAll("circle")
+          .attr("transform", transform)
+          .attr('cx', function(d) {return newX(d.tempo)})
+          .attr('cy', function(d) {return newY(d.acousticness)});
+      } else if (selectedOption == "danceability"){
+        scatter
+          .selectAll("circle")
+          .attr("transform", transform)
+          .attr('cx', function(d) {return newX(d.tempo)})
+          .attr('cy', function(d) {return newY(d.danceability)});
+
+      }else if (selectedOption == "liveness"){
+
+        scatter
+          .selectAll("circle")
+          .attr("transform", transform)
+          .attr('cx', function(d) {return newX(d.tempo)})
+          .attr('cy', function(d) {return newY(d.liveness)});
+      }
+
+
+
     }
+
+
 
 }
 
@@ -576,27 +679,6 @@ function drawLineDropdown(data, id, selected_year){
 
 
   }
-
-  //draw a dot  didn't work. :(
-  /*
-  if(selected_year != 0){
-
-    console.log(data[0 + selected_year - 1920]);
-    var selectedData = data[0 + selected_year - 1920];
-    console.log(selectedData.acousticness);
-
-    svg_line.append('g')
-      .selectAll("path")
-      .data(data)
-      .enter()
-      .append("circle")
-        .attr("cx", data[0 + selected_year - 1920].year )
-        .attr("cy", data[0 + selected_year - 1920].acousticness )
-        .attr("r", 10)
-        .style("fill", "blue")
-
-  }
-  */
 
 
   // A function that update the chart
