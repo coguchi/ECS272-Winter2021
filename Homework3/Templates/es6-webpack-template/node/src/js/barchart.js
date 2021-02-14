@@ -500,7 +500,7 @@ function drawLineDropdown(data, id, selected_year){
     .attr("dy", "1em")
     .style("font-size", "12px")
     .style("text-anchor", "middle")
-    .text("Value");
+    .text("Tempo");
 
   //add title
   svg_line.append("text")
@@ -509,7 +509,7 @@ function drawLineDropdown(data, id, selected_year){
     .attr("text-anchor", "left")
     .style("font-size", "15px")
     .style("text-decoration", "underline")
-    .text("The characteristics of music over the years");
+    .text("The transition of tempo over the years");
 
   // Initialize line with group a
   var line = svg_line
@@ -544,7 +544,7 @@ function drawLineDropdown(data, id, selected_year){
     const type = d3Annotation.annotationLabel;
     const annotations = [{
       note: {
-        label: data[0 + selected_year - 1920].tempo,
+        label: parseFloat(data[0 + selected_year - 1920].tempo).toFixed(2),
         bgPadding: 20,
         title: selected_year
       },
