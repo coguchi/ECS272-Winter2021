@@ -132,7 +132,7 @@ function drawScatterZoom(data,id){
     SVG.append("text")
       .attr("transform",
             "translate(" + (width/2) + " ," +
-                           (height + margin.top + 40) + ")")
+                           (height + margin.top + 10) + ")")
       .style("font-size", "12px")
       .style("text-anchor", "left")
       .text("Tempo");
@@ -162,7 +162,7 @@ function drawScatterZoom(data,id){
       .attr("text-anchor", "left")
       .style("font-size", "15px")
       .style("text-decoration", "underline")
-      .text("Correlation between tempo and other characteristics");
+      .text("Relation between tempo and other characteristics");
 
     // Add a clipPath: everything out of this area won't be drawn.
     var clip = SVG.append("defs").append("SVG:clipPath")
@@ -748,7 +748,7 @@ function drawPCP(data,id){
   /* 1st where we are drawing*/
   var svg = d3.select(id).append("svg")
       .attr("viewBox", [0, 0, width, height+65])
-      .attr("width", "100%")
+      .attr("width", width + 130)
       .attr("height", height)
       .append("g")
           .attr("transform",
@@ -828,6 +828,8 @@ function drawPCP(data,id){
   svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 130).text("Year 1987-2021").style("font-size", "15px").attr("alignment-baseline","middle")
   svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 30).text("Hover on to see").style("font-size", "15px").attr("alignment-baseline","middle")
   svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 45).text("individual data").style("font-size", "15px").attr("alignment-baseline","middle")
+  svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 60).text("and update the").style("font-size", "15px").attr("alignment-baseline","middle")
+  svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 75).text("line chart below").style("font-size", "15px").attr("alignment-baseline","middle")
 
   // Build the X scale -> it find the best position for each Y axis
   //var x = d3.scalePoint()
