@@ -520,7 +520,7 @@ function drawLineDropdown(data, id, selected_year){
 
   //reference: https://www.d3-graph-gallery.com/graph/line_select.html
 
-  console.log("hi");
+  //console.log("hi");
   console.log(selected_year);
 
 
@@ -624,7 +624,7 @@ function drawLineDropdown(data, id, selected_year){
         .y(function(d) { return y(+d.tempo) })
       )
       //.attr("stroke", function(d){ return myColor("acousticness") })
-      .attr("stroke","violet" )
+      .attr("stroke","black" )
       .style("stroke-width", 4)
       .style("fill", "none")
 
@@ -710,7 +710,7 @@ function drawLineDropdown(data, id, selected_year){
           .y(function(d) { return y(+d.value) })
         )
         //.attr("stroke", function(d){ return myColor(selectedGroup) })
-        .attr("stroke", "violet")
+        .attr("stroke", "black")
 
 
 
