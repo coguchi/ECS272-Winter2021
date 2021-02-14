@@ -480,14 +480,16 @@ function drawLineDropdown(data, id, selected_year){
 
   // Add Y axis
   var y = d3.scaleLinear()
-    .domain( [0,1])
+    //.domain( [0,1])
+    .domain( [90,140])
     .range([ height, 0 ]);
   var yAxis = svg_line.append("g")
     .call(d3.axisLeft(y));
 
 
         var y2 = d3.scaleLinear()
-          .domain( [0,1])
+          //.domain( [0,1])
+          .domain( [90,140])
           .range([ height, margin.top ]);
 
   // text label for the y axis
@@ -516,12 +518,25 @@ function drawLineDropdown(data, id, selected_year){
       .datum(data)
       .attr("d", d3.line()
         .x(function(d) { return x(+d.year) })
-        .y(function(d) { return y(+d.acousticness) })
+        .y(function(d) { return y(+d.tempo) })
       )
       //.attr("stroke", function(d){ return myColor("acousticness") })
       .attr("stroke","violet" )
       .style("stroke-width", 4)
       .style("fill", "none")
+
+    // create animation curtain
+  svg_line.append('rect')
+    .attr('x', -1 * width + 45 )
+    .attr('y', -1 * height + margin.bottom - 60)
+    .attr('height', height-20)
+    .attr('width', width - margin.left)
+    .attr('class', 'curtain')
+    .attr('transform', 'rotate(180)')
+    .style('fill', '#ffffff')
+    .transition()
+    .duration(270)
+    .attr("width", 0)
 
 
   //make annotation
@@ -529,9 +544,9 @@ function drawLineDropdown(data, id, selected_year){
     const type = d3Annotation.annotationLabel;
     const annotations = [{
       note: {
-        label: selected_year + "\n" + data[0 + selected_year - 1920].acousticness,
+        label: data[0 + selected_year - 1920].tempo,
         bgPadding: 20,
-        title: "Annotations :)"
+        title: selected_year
       },
       //can use x, y directly instead of data
       data: data[0 + selected_year - 1920],
@@ -550,7 +565,7 @@ function drawLineDropdown(data, id, selected_year){
       //if using x, y in annotations JSON
       .accessors({
         x: d => x2(d.year),
-        y: d => y2(d.acousticness)
+        y: d => y2(d.tempo)
       })
       .annotations(annotations)
 
