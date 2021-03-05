@@ -30,12 +30,18 @@ export async function drawBarFromCsvAsync(){
 
     //draw diamonds PCP for Final Project
     const data_diamons = await d3.csv(diamondsPath);
-    console.log(data_diamons)
+    console.log(data_diamons);
+    drawDiamondsPCP(data_diamons,"#diamondsPCP")
+    
 
     //There will be some delay in console before it prints the array
     //if csv file, this is the main place to work.
 }
 
+function drawDiamondsPCP(data, id){
+  console.log("hehe")
+
+}
 
 function drawPCP(data,id){
 
