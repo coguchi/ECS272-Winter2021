@@ -57,13 +57,22 @@ function drawDiamondsPCP(data, id){
       .append("g")
           .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
+              
 
   // Color scale: give me a specie name, I return a color
   //cut = {"\"Fair\"":"1", "\"Good\"":"2", "\"Very Good\"":"3", "\"Premium\"":"4", "\"Ideal\"":"5"}
+
+
+  //var colorScale = ["#f9cb35","#e45a31","#bc3754","#8a226a","#210c4a"]; //inferno
+  //var colorScale = ["#c6dbef","#6baed6","#4292c6","#2171b5","#08306b"]; //blue
+  var colorScale = ["#87CEFA","#00BFFF","#1E90FF","#0000FF","#000D8B"]; //blue brighter
+  //var colorScale = ["#e41a1c","#4daf4a","#984ea3","#ff7f00","#f781bf"]; //colorful
+  //var colorScale = ["#66c2a5","#fc8d62","#e78ac3","#a6d854","#ffd92f"]; //lighter colorful
+
   var color = d3.scaleOrdinal()
     //.domain(["Fair", "Good", "Very Good", "Premium", "Ideal" ])
-    .domain(["Fair", "Good", "Very Good", "Premium", "Ideal" ])
-    .range([ "#440154ff", "#21908dff", "#fde725ff","#00908dff", "#fde72522"])
+    .domain(["1", "2", "3", "4", "5" ])
+    .range(colorScale) //inferno reverse. darker, the better.
 
   // the list of dimensions we want to keep in the plot.
   var dimensions = ["cut","price","carat","clarity","color"];
@@ -157,6 +166,22 @@ function drawDiamondsPCP(data, id){
   .style("text-decoration", "underline")
   .text("Overview of the characteristics of diamonds");
 
+
+    //put legend
+    svg.append("circle").attr("cx",parentDiv.clientWidth+ 10-200).attr("cy",190).attr("r", 6).style("fill", colorScale[0])
+    svg.append("circle").attr("cx",parentDiv.clientWidth+ 10-200).attr("cy",160).attr("r", 6).style("fill", colorScale[1])
+    svg.append("circle").attr("cx",parentDiv.clientWidth+ 10-200).attr("cy",130).attr("r", 6).style("fill", colorScale[2])
+    svg.append("circle").attr("cx",parentDiv.clientWidth+ 10-200).attr("cy",100).attr("r", 6).style("fill", colorScale[3])
+    svg.append("circle").attr("cx",parentDiv.clientWidth+ 10-200).attr("cy",70).attr("r", 6).style("fill", colorScale[4])
+     //cut = {"\"Fair\"":"1", "\"Good\"":"2", "\"Very Good\"":"3", "\"Premium\"":"4", "\"Ideal\"":"5"}
+    svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 190).text("1: Fair").style("font-size", "15px").attr("alignment-baseline","middle")
+    svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 160).text("2: Good").style("font-size", "15px").attr("alignment-baseline","middle")
+    svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 130).text("3: Very Good").style("font-size", "15px").attr("alignment-baseline","middle")
+    svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 100).text("4: Premium").style("font-size", "15px").attr("alignment-baseline","middle")
+    svg.append("text").attr("x", parentDiv.clientWidth+ 20-200).attr("y", 70).text("5: Ideal").style("font-size", "15px").attr("alignment-baseline","middle")
+    svg.append("text").attr("x", parentDiv.clientWidth+ 10-200).attr("y", 30-30).text("Hover on to see").style("font-size", "15px").attr("alignment-baseline","middle")
+    svg.append("text").attr("x", parentDiv.clientWidth+ 10-200).attr("y", 45-30).text("individual data").style("font-size", "15px").attr("alignment-baseline","middle")
+    svg.append("text").attr("x", parentDiv.clientWidth+ -200).attr("y", 50).text("Cut").style("font-size", "18px").attr("alignment-baseline","left")
 
 }
 
