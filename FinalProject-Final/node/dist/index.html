@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Recursive&display=swap" rel="stylesheet">
+  <!-- CSS only -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+  <title>Document</title>
+  <style>
+    * {
+      font-family: "Recursive", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('./bg.jpg');
+      background-size: cover;
+    }
+    .xaxislabel{
+      text-transform: capitalize;
+    }
+    #helper{
+      display: none;
+      position: absolute;
+      top: 30px;
+      width: 150px;
+      right: 0px;
+      z-index: 30;
+      color: black;
+      border-radius: 8px;
+      background-color: rgba(128, 128, 128, 0.616);
+      padding: 10px;
+    }
+    .qmi{
+      position: relative;
+    }
+    .bi-question-circle-fill{
+      cursor: pointer;
+    }
+    .helpertext:hover #helper{
+      display: block;
+    }
+    #tooltip {
+      background-color: rgba(187, 187, 187, 0.7);
+      border-radius: 5px;
+      height: auto;
+      padding: 5px;
+      pointer-events: none;
+      opacity: 0;
+      text-decoration: none;
+      position: absolute;
+      text-align: left;
+    }
+
+    .card {
+      margin: 20px 10px;
+    }
+
+    .axis text {
+      font-size: 15px 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body  h2 text-center">
+            Welcome to Diamond Exploratorium! 
+            <div class="card-body  h4 text-left">
+               <div class="card-body  h4 text-left">
+                Diamonds are shimmering gemstones that have a arbitrary value and yet its allure is universal. Many
+                cultures use them to portray the value of love, strength, and magic. Diamonds have become popular since
+                the 19th century due to its improved cutting and polishing techniques. The value of the stone comes from
+                its unique appearance, strength and relative rarity. Our storytelling visualization will help understand
+                and analyze the exact attributes and their interconnectivity that determines the industrial value of these
+                treasured diamonds. <br><br>Before getting started, let's get familiarized with each of the diamond attributes: Cut, Carat, Clarity, Color.
+          </div>
+            </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="row">
+          <div class="col-6">
+            <div class="card">
+              <div class="card-body">
+                <img class="img-fluid rounded" src="./1.jpeg" alt="">
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card">
+              <div class="card-body">
+                <img class="img-fluid rounded" src="./4.jpeg" alt="">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6">
+            <div class="card">
+              <div class="card-body">
+                <img class="img-fluid rounded" src="./5.jpeg" alt="">
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card">
+              <div class="card-body">
+                <img class="img-fluid rounded" src="./3.jpeg" alt="">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body  h4 text-left">
+            Now, let's see how the 4 attributes and price in U.S. dollars of 300 diamonds are related.
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body" id="classBar">
+            <div class=" d-flex justify-content-between align-items-center"></div> 
+            <h3>Overview of the Characteristics of Diamonds</h3>
+            <span class="qmi bi bi-question-circle-fill helpertext">
+              <div id="helper">Hover on the "cut" axis to view data by each diamond cut.</div>
+            </span> 
+           <hr>
+            <div id="diamondsPCP"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body h4 text-left">
+            A diamond’s cut refers to how well-proportioned the dimensions of a diamond are, and how these surfaces, or facets, 
+            are positioned to create sparkle and brilliance. We'll now see how the value of carat, clarity and color changes based on the diamond cut. 
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <h3>Diamond Characteristics by Different Cuts</h3>
+            <hr>
+            <div class="classRadar" id="classRadar">
+              <select id="mySelect_radar" class="form-select" data-style="btn-primary">
+                <option value="radar_all">All</option>
+                <option value="4">Fair</option>
+                <option value="3">Good</option>
+                <option value="2">Very Good</option>
+                <option value="1">Premium</option>
+                <option value="0">Ideal</option>
+              </select>
+              <div id="radar_chart_d3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body  h4 text-left">
+            Let's see how the characteristics of diamond vary in respect to price.
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <div class=" d-flex justify-content-between align-items-center">
+              <h3>Price vs. Diamond Characteristics</h3> 
+              <span class="qmi bi bi-question-circle-fill helpertext">
+                <div id="helper">Hover and zoom by selecting a region on the data points.</div>
+              </span> 
+            </div>
+            <hr>
+            <select class="form-select" id="selectButton"></select>
+            <div id="my_dataviz"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body  h4 text-center">
+            We hope that you got a deeper understanding on diamonds. <br> Thank You!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./bundle.js"></script>
+</body>
+
+</html>
